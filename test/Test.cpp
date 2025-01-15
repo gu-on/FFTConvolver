@@ -28,10 +28,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "../FFTConvolver.h"
-#include "../TwoStageFFTConvolver.h"
-#include "../Utilities.h"
+#include <FFTConvolver.h>
+#include <TwoStageFFTConvolver.h>
+#include <Utilities.h>
 
+#include <catch2/catch_test_macros.hpp>
 
 template<typename T>
 void SimpleConvolve(const T* input, size_t inLen, const T* ir, size_t irLen, T* output)
@@ -246,97 +247,82 @@ static bool TestTwoStageConvolver(size_t inputSize,
   }
 }
 
+TEST_CASE("Test Convolver Correctness", "[Conv]") {
+  CHECK(TestConvolver(1, 1, 1, 1, 1, true));
+  CHECK(TestConvolver(2, 2, 2, 2, 2, true));
+  CHECK(TestConvolver(3, 3, 3, 3, 3, true));
 
-#define TEST_CORRECTNESS
-//#define TEST_PERFORMANCE
+  CHECK(TestConvolver(3, 2, 2, 2, 2, true));
+  CHECK(TestConvolver(4, 2, 2, 2, 2, true));
+  CHECK(TestConvolver(4, 3, 2, 2, 2, true));
+  CHECK(TestConvolver(9, 4, 3, 3, 2, true));
+  CHECK(TestConvolver(171, 7, 5, 5, 5, true));
+  CHECK(TestConvolver(1979, 17, 7, 7, 5, true));
+  CHECK(TestConvolver(100, 10, 3, 5, 5, true));
+  CHECK(TestConvolver(123, 45, 12, 34, 34, true));
 
-#define TEST_FFTCONVOLVER
-#define TEST_TWOSTAGEFFTCONVOLVER
+  CHECK(TestConvolver(2, 3, 2, 2, 2, true));
+  CHECK(TestConvolver(2, 4, 2, 2, 2, true));
+  CHECK(TestConvolver(3, 4, 2, 2, 2, true));
+  CHECK(TestConvolver(4, 9, 3, 3, 3, true));
+  CHECK(TestConvolver(7, 171, 5, 5, 5, true));
+  CHECK(TestConvolver(17, 1979, 7, 7, 7, true));
+  CHECK(TestConvolver(10, 100, 3, 5, 5, true));
+  CHECK(TestConvolver(45, 123, 12, 34, 34, true));
 
+  CHECK(TestConvolver(100000, 1234, 100, 128, 128, true));
+  CHECK(TestConvolver(100000, 1234, 100, 256, 256, true));
+  CHECK(TestConvolver(100000, 1234, 100, 512, 512, true));
+  CHECK(TestConvolver(100000, 1234, 100, 1024, 1024, true));
+  CHECK(TestConvolver(100000, 1234, 100, 2048, 2048, true));
 
-int main()
-{ 
-#if defined(TEST_CORRECTNESS) && defined(TEST_FFTCONVOLVER)
-  TestConvolver(1, 1, 1, 1, 1, true);
-  TestConvolver(2, 2, 2, 2, 2, true);
-  TestConvolver(3, 3, 3, 3, 3, true);
-  
-  TestConvolver(3, 2, 2, 2, 2, true);
-  TestConvolver(4, 2, 2, 2, 2, true);
-  TestConvolver(4, 3, 2, 2, 2, true);
-  TestConvolver(9, 4, 3, 3, 2, true);
-  TestConvolver(171, 7, 5, 5, 5, true);
-  TestConvolver(1979, 17, 7, 7, 5, true);
-  TestConvolver(100, 10, 3, 5, 5, true);
-  TestConvolver(123, 45, 12, 34, 34, true);
-  
-  TestConvolver(2, 3, 2, 2, 2, true);
-  TestConvolver(2, 4, 2, 2, 2, true);
-  TestConvolver(3, 4, 2, 2, 2, true);
-  TestConvolver(4, 9, 3, 3, 3, true);
-  TestConvolver(7, 171, 5, 5, 5, true);
-  TestConvolver(17, 1979, 7, 7, 7, true);
-  TestConvolver(10, 100, 3, 5, 5, true);
-  TestConvolver(45, 123, 12, 34, 34, true);
-  
-  TestConvolver(100000, 1234, 100,  128,  128, true);
-  TestConvolver(100000, 1234, 100,  256,  256, true);
-  TestConvolver(100000, 1234, 100,  512,  512, true);
-  TestConvolver(100000, 1234, 100, 1024, 1024, true);
-  TestConvolver(100000, 1234, 100, 2048, 2048, true);
+  CHECK(TestConvolver(100000, 4321, 100, 128, 128, true));
+  CHECK(TestConvolver(100000, 4321, 100, 256, 256, true));
+  CHECK(TestConvolver(100000, 4321, 100, 512, 512, true));
+  CHECK(TestConvolver(100000, 4321, 100, 1024, 1024, true));
+  CHECK(TestConvolver(100000, 4321, 100, 2048, 2048, true));
+}
 
-  TestConvolver(100000, 4321, 100,  128,  128, true);
-  TestConvolver(100000, 4321, 100,  256,  256, true);
-  TestConvolver(100000, 4321, 100,  512,  512, true);
-  TestConvolver(100000, 4321, 100, 1024, 1024, true);
-  TestConvolver(100000, 4321, 100, 2048, 2048, true);
-#endif
-  
+TEST_CASE("Test Convolver Performance", "[Conv][Perf]") {
+  CHECK(TestConvolver(3 * 60 * 44100, 20 * 44100, 50, 100, 1024, false));
+}
 
-#if defined(TEST_PERFORMANCE) && defined(TEST_FFTCONVOLVER)
-  TestConvolver(3*60*44100, 20*44100, 50, 100, 1024, false);
-#endif
-  
-#if defined(TEST_CORRECTNESS) && defined(TEST_TWOSTAGEFFTCONVOLVER)
-  TestTwoStageConvolver(1, 1, 1, 1, 1, 1, true);
-  TestTwoStageConvolver(2, 2, 2, 2, 2, 2, true);
-  TestTwoStageConvolver(3, 3, 3, 3, 3, 3, true);
+TEST_CASE("Test TwoStageConvolver Correctness", "[TwoStageConv]") {
+  CHECK(TestTwoStageConvolver(1, 1, 1, 1, 1, 1, true));
+  CHECK(TestTwoStageConvolver(2, 2, 2, 2, 2, 2, true));
+  CHECK(TestTwoStageConvolver(3, 3, 3, 3, 3, 3, true));
 
-  TestTwoStageConvolver(3, 2, 2, 2, 2, 4, true);
-  TestTwoStageConvolver(4, 2, 2, 2, 2, 4, true);
-  TestTwoStageConvolver(4, 3, 2, 2, 2, 4, true);
-  TestTwoStageConvolver(9, 4, 3, 3, 2, 4, true);
-  TestTwoStageConvolver(171, 7, 5, 5, 5, 10,true);
-  TestTwoStageConvolver(1979, 17, 7, 7, 5, 10, true);
-  TestTwoStageConvolver(100, 10, 3, 5, 5, 10, true);
-  TestTwoStageConvolver(123, 45, 12, 34, 34, 68, true);
+  CHECK(TestTwoStageConvolver(3, 2, 2, 2, 2, 4, true));
+  CHECK(TestTwoStageConvolver(4, 2, 2, 2, 2, 4, true));
+  CHECK(TestTwoStageConvolver(4, 3, 2, 2, 2, 4, true));
+  CHECK(TestTwoStageConvolver(9, 4, 3, 3, 2, 4, true));
+  CHECK(TestTwoStageConvolver(171, 7, 5, 5, 5, 10, true));
+  CHECK(TestTwoStageConvolver(1979, 17, 7, 7, 5, 10, true));
+  CHECK(TestTwoStageConvolver(100, 10, 3, 5, 5, 10, true));
+  CHECK(TestTwoStageConvolver(123, 45, 12, 34, 34, 68, true));
 
-  TestTwoStageConvolver(2, 3, 2, 2, 1, 2, true);
-  TestTwoStageConvolver(2, 4, 2, 2, 1, 2, true);
-  TestTwoStageConvolver(3, 4, 2, 2, 1, 2, true);
-  TestTwoStageConvolver(4, 9, 3, 3, 2, 4, true);
-  TestTwoStageConvolver(7, 171, 5, 5, 2, 16, true);
-  TestTwoStageConvolver(17, 1979, 7, 7, 4, 16, true);
-  TestTwoStageConvolver(10, 100, 3, 5, 1, 4, true);
-  TestTwoStageConvolver(45, 123, 12, 34, 4, 32, true);
+  CHECK(TestTwoStageConvolver(2, 3, 2, 2, 1, 2, true));
+  CHECK(TestTwoStageConvolver(2, 4, 2, 2, 1, 2, true));
+  CHECK(TestTwoStageConvolver(3, 4, 2, 2, 1, 2, true));
+  CHECK(TestTwoStageConvolver(4, 9, 3, 3, 2, 4, true));
+  CHECK(TestTwoStageConvolver(7, 171, 5, 5, 2, 16, true));
+  CHECK(TestTwoStageConvolver(17, 1979, 7, 7, 4, 16, true));
+  CHECK(TestTwoStageConvolver(10, 100, 3, 5, 1, 4, true));
+  CHECK(TestTwoStageConvolver(45, 123, 12, 34, 4, 32, true));
 
-  TestTwoStageConvolver(100000, 1234, 100,  128,  128, 4096, true);
-  TestTwoStageConvolver(100000, 1234, 100,  256,  256, 4096, true);
-  TestTwoStageConvolver(100000, 1234, 100,  512,  512, 4096, true);
-  TestTwoStageConvolver(100000, 1234, 100, 1024, 1024, 4096, true);
-  TestTwoStageConvolver(100000, 1234, 100, 2048, 2048, 4096, true);
+  CHECK(TestTwoStageConvolver(100000, 1234, 100, 128, 128, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 1234, 100, 256, 256, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 1234, 100, 512, 512, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 1234, 100, 1024, 1024, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 1234, 100, 2048, 2048, 4096, true));
 
-  TestTwoStageConvolver(100000, 4321, 100,  128,  128, 4096, true);
-  TestTwoStageConvolver(100000, 4321, 100,  256,  256, 4096, true);
-  TestTwoStageConvolver(100000, 4321, 100,  512,  512, 4096, true);
-  TestTwoStageConvolver(100000, 4321, 100, 1024, 1024, 4096, true);
-  TestTwoStageConvolver(100000, 4321, 100, 2048, 2048, 4096, true);
-#endif
+  CHECK(TestTwoStageConvolver(100000, 4321, 100, 128, 128, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 4321, 100, 256, 256, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 4321, 100, 512, 512, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 4321, 100, 1024, 1024, 4096, true));
+  CHECK(TestTwoStageConvolver(100000, 4321, 100, 2048, 2048, 4096, true));
+}
 
-
-#if defined(TEST_PERFORMANCE) && defined(TEST_TWOSTAGEFFTCONVOLVER)
-  TestTwoStageConvolver(3*60*44100, 20*44100, 50, 100, 100, 2*8192, false);
-#endif
-  
-  return 0;
+TEST_CASE("Test TwoStageConvolver Performance", "[TwoStageConv][Perf]") {
+  CHECK(TestTwoStageConvolver(3 * 60 * 44100, 20 * 44100, 50, 100, 100, 2 * 8192, false));
 }

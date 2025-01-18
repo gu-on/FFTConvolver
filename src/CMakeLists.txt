@@ -5,4 +5,4 @@ add_library(fftconvolver STATIC
     Utilities.cpp
 )
 
-target_include_directories(fftconvolver PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(fftconvolver PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")
